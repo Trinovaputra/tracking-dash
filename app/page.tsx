@@ -10,6 +10,6 @@ export default async function Home() {
   } else if (session?.user?.role === "USER") {
     redirect("/dashboard/user")
   } else {
-    redirect("/auth/login")
+    redirect("/login")
   }
 }

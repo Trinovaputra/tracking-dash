@@ -9,6 +9,11 @@ export default withAuth(
 
     if (isAuthPage) {
       if (isAuth) {
+        if (token?.role === "ADMIN") {
+          return NextResponse.redirect(new URL("/dashboard/admin", req.url));
+        } else if (token?.role === "USER") {
+          return NextResponse.redirect(new URL("/dashboard/user", req.url));
+        }
         return NextResponse.redirect(new URL("/dashboard", req.url));
       }
       return null;
