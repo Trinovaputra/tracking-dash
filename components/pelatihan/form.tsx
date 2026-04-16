@@ -34,24 +34,27 @@ export function PelatihanForm({ initialData, isEdit }: FormProps) {
   } = useForm<PelatihanFormInput>({
     resolver: zodResolver(pelatihanSchema),
     defaultValues: initialData
-      ? {
-          ...initialData,
-          tanggal: initialData.tanggal instanceof Date
-            ? initialData.tanggal.toISOString().split("T")[0]
-            : String(initialData.tanggal).split("T")[0],
-        }
-      : {
-          name: "",
-          description: "",
-          image: "",
-          tanggal: "",
-          status: true,
-        },
+    ? {
+        name: initialData.name,
+        description: initialData.description ?? "",
+        image: initialData.image ?? "",
+        tanggal: initialData.tanggal
+        ? new Date(initialData.tanggal as string).toISOString().split("T")[0]
+        : "",
+        status: initialData.status,
+      }
+    : {
+        name: "",
+        description: "",
+        image: "",
+        tanggal: "",
+        status: true,
+      },
   });
 
   const isStatusActive = watch("status");
 
-  const onSubmit: SubmitHandler<PelatihanFormInput> = async (data) => {
+  const onSubmit = async (data: PelatihanFormInput) => {
     setLoading(true);
     setError(null);
     
