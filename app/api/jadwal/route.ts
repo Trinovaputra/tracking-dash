@@ -80,7 +80,7 @@ console.log('ROW COUNT:', result.rowCount);
       success: true,
       data: result.rows[0],
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('POST JADWAL ERROR:', error);
     console.error('STACK:', error?.stack);
 

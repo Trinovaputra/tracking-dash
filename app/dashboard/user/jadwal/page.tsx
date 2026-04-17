@@ -27,6 +27,32 @@ const [debouncedSearch, setDebouncedSearch] = useState('');
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const handleUpdateJadwal = async (id: string, updatedData: any) => {
+  try {
+    const res = await fetch(`/api/jadwal/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Pastikan updatedData berisi { date, location, pelatihanId, metode, status }
+      body: JSON.stringify(updatedData), 
+    }); 
+
+    const json = await res.json();
+
+    if (json.success) {
+      alert('Jadwal berhasil diupdate!');
+      // Refresh data di layar agar perubahannya langsung terlihat
+      fetchData(); 
+    } else {
+      alert('Gagal update: ' + json.message);
+    }
+  } catch (error) {
+    console.error('Error updating jadwal:', error);
+    alert('Terjadi kesalahan pada sistem.');
+  }
+};
+
   const fetchData = async () => {
     const res = await fetch('/api/jadwal');
     const json = await res.json();

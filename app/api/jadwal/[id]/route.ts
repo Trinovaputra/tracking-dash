@@ -5,32 +5,13 @@ function getErrorMessage(error: unknown) {
   return 'Terjadi kesalahan server';
 }
 
+type RouteParams = {
+  params: Promise<{ id: string }> | { id: string };
+};
+
 export async function GET(
-<<<<<<< HEAD
-  _req: Request,
-  { params }: { params: { id: string } }
-) {
-  const { id } = params;
-
-  const result = await pool.query(
-    `SELECT * FROM "Jadwal" WHERE id = $1`,
-    [id]
-  );
-
-  return Response.json({
-  success: true,
-  data: result.rows[0],
-});
-}
-
-//put
-export async function PUT(
-  req: Request,
-  { params }: { params: { id: string } }
-=======
   req: Request,
   { params }: { params: Promise<{ id: string }> }
->>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
 ) {
   try {
     const { id } = await params;
@@ -51,11 +32,6 @@ export async function PUT(
       success: true,
       data: result.rows[0],
     });
-<<<<<<< HEAD
-  } catch (error) {
-    return Response.json({ success: false, message: getErrorMessage(error) });
-=======
-
   } catch (error: any) {
     return Response.json(
       { success: false, message: error.message },
@@ -65,22 +41,22 @@ export async function PUT(
 }
 
 //put
-export async function PUT(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: Request, context: RouteParams) {
   try {
-    const { id } = await params;
+    // Catatan: Jika menggunakan Next.js 15+, params harus di-await: 
+    // const { id } = await params;
+    const resolvedParams = await context.params; 
+    const id = resolvedParams.id;
 
-    if (!id) {
-      return Response.json({
-        success: false,
-        message: 'ID tidak dikirim',
-      });
+    console.log('ID Diterima di Backend:', id); // Cek apakah ID masuk
+
+    if (!id || id === 'undefined') {
+      return Response.json({ success: false, message: 'ID tidak valid' }, { status: 400 });
     }
 
     const body = await req.json();
-    const { date, location, pelatihanId, status } = body;
+    // Tambahkan 'metode' di sini
+    const { date, location, pelatihanId, metode, status } = body;
 
     const result = await pool.query(
       `UPDATE "Jadwal"
@@ -88,44 +64,31 @@ export async function PUT(
            "location" = $2,
            "pelatihanId" = $3,
            "status" = $4,
+           "metode" = $5, 
            "updatedAt" = NOW()
-       WHERE "id" = $5
+       WHERE "id" = $6
        RETURNING *`,
-      [date, location, String(pelatihanId), status, id]
+       // Pastikan urutan array ini sama persis dengan urutan $1 sampai $6 di atas
+      [date, location, String(pelatihanId), status, metode, id] 
     );
 
     if (result.rowCount === 0) {
-      return Response.json({
-        success: false,
-        message: 'Data tidak ditemukan',
-      });
+      return Response.json({ success: false, message: 'Data tidak ditemukan' }, { status: 404 });
     }
 
-    return Response.json({
-      success: true,
-      data: result.rows[0],
-    });
+    return Response.json({ success: true, data: result.rows[0] });
 
   } catch (error: any) {
     console.error('UPDATE ERROR:', error);
 
-    return Response.json({
-      success: false,
-      message: error.message,
-    });
->>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
+    return Response.json({ success: false, message: error.message }, { status: 500 });
   }
 }
 
 //delete
 export async function DELETE(
-<<<<<<< HEAD
-  _req: Request,
-  { params }: { params: { id: string } }
-=======
   req: Request,
   { params }: { params: Promise<{ id: string }> }
->>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
 ) {
   try {
     const { id } = await params;
