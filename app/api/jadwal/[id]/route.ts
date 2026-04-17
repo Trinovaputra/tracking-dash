@@ -6,6 +6,7 @@ function getErrorMessage(error: unknown) {
 }
 
 export async function GET(
+<<<<<<< HEAD
   _req: Request,
   { params }: { params: { id: string } }
 ) {
@@ -26,57 +27,119 @@ export async function GET(
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
+=======
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+>>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
 ) {
   try {
-    const body = await req.json();
-    const { date, location, pelatihanId, metode, status } = body;
+    const { id } = await params;
 
     const result = await pool.query(
-  `UPDATE "Jadwal"
-   SET "date" = $1,
-       "location" = $2,
-       "pelatihanId" = $3,
-       "metode" = $4,
-       "status" = $5,
-       "updatedAt" = NOW()
-   WHERE id = $6
-   RETURNING *`,
-  [date, location, String(pelatihanId), metode, status, params.id]
-);
+      `SELECT * FROM "Jadwal" WHERE "id" = $1`,
+      [id]
+    );
 
-    if (result.rowCount === 0) {
-  return Response.json({
-    success: false,
-    message: 'Data tidak ditemukan',
-  });
-}
+    if (result.rows.length === 0) {
+      return Response.json(
+        { success: false, message: 'Data tidak ditemukan' },
+        { status: 404 }
+      );
+    }
 
     return Response.json({
       success: true,
       data: result.rows[0],
     });
+<<<<<<< HEAD
   } catch (error) {
     return Response.json({ success: false, message: getErrorMessage(error) });
+=======
+
+  } catch (error: any) {
+    return Response.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
+  }
+}
+
+//put
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+
+    if (!id) {
+      return Response.json({
+        success: false,
+        message: 'ID tidak dikirim',
+      });
+    }
+
+    const body = await req.json();
+    const { date, location, pelatihanId, status } = body;
+
+    const result = await pool.query(
+      `UPDATE "Jadwal"
+       SET "date" = $1,
+           "location" = $2,
+           "pelatihanId" = $3,
+           "status" = $4,
+           "updatedAt" = NOW()
+       WHERE "id" = $5
+       RETURNING *`,
+      [date, location, String(pelatihanId), status, id]
+    );
+
+    if (result.rowCount === 0) {
+      return Response.json({
+        success: false,
+        message: 'Data tidak ditemukan',
+      });
+    }
+
+    return Response.json({
+      success: true,
+      data: result.rows[0],
+    });
+
+  } catch (error: any) {
+    console.error('UPDATE ERROR:', error);
+
+    return Response.json({
+      success: false,
+      message: error.message,
+    });
+>>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
   }
 }
 
 //delete
 export async function DELETE(
+<<<<<<< HEAD
   _req: Request,
   { params }: { params: { id: string } }
+=======
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+>>>>>>> d3f7bfd6aa7302cf46e820b001ae63b1159cd341
 ) {
   try {
-   const result = await pool.query(
-  `DELETE FROM "Jadwal" WHERE id = $1 RETURNING *`,
-  [params.id]
-);
+    const { id } = await params;
+    const result = await pool.query(
+      `DELETE FROM "Jadwal" WHERE id = $1 RETURNING *`,
+      [id]
+    );
 
-if (result.rowCount === 0) {
-  return Response.json({
-    success: false,
-    message: 'Data tidak ditemukan',
-  });
-}
+    if (result.rowCount === 0) {
+      return Response.json({
+        success: false,
+        message: 'Data tidak ditemukan',
+      });
+    }
 
     return Response.json({ success: true });
   } catch (error) {

@@ -8,6 +8,8 @@ function getErrorMessage(error: unknown) {
 
 export async function GET() {
   try {
+    const db = await pool.query(`SELECT current_database()`);
+    console.log('CONNECTED DB:', db.rows[0]);
     const result = await pool.query(`
       SELECT *
       FROM "Jadwal"
@@ -35,7 +37,15 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
 
+    console.log('BODY:', body);
+
     const { date, location, pelatihanId, metode, status } = body;
+
+    console.log('date:', date);
+    console.log('location:', location);
+    console.log('pelatihanId:', pelatihanId);
+    console.log('metode:', metode);
+    console.log('status:', status);
 
     if (!date || !location || !pelatihanId) {
       return Response.json(
@@ -63,6 +73,8 @@ export async function POST(req: Request) {
     status,
   ]
 );
+console.log('RESULT ROWS:', result.rows);
+console.log('ROW COUNT:', result.rowCount);
 
     return Response.json({
       success: true,
@@ -70,6 +82,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('POST JADWAL ERROR:', error);
+    console.error('STACK:', error?.stack);
 
     return Response.json(
       {

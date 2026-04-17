@@ -7,7 +7,7 @@ type Jadwal = {
   date: string;
   location: string;
   pelatihanId: string;
-   metode: string;   
+  metode: string;   
   status: string;
 };
 
@@ -39,7 +39,7 @@ export default function AdminJadwalPage() {
     location: '',
     pelatihanId: '',
     metode: '', 
-  status: '',
+    status: '',
   });
 
   // FETCH 
@@ -77,13 +77,18 @@ export default function AdminJadwalPage() {
 
   // TAMBAH 
   const handleAdd = async () => {
-    if (!form.date || !form.location || !form.pelatihanId) {
-  alert('Semua field wajib diisi');
-  return;
-}
+  if (!form.date) return alert('Tanggal kosong');
+  if (!form.pelatihanId) return alert('Pelatihan belum dipilih');
+  if (!form.metode) return alert('Metode belum dipilih');
+  if (!form.status) return alert('Status belum dipilih');
+
+  if (form.metode === 'offline' && !form.location) {
+    return alert('Lokasi wajib diisi untuk offline');
+  }
+
   const payload = {
     ...form,
-    date: new Date(form.date).toISOString(), 
+    date: new Date(form.date).toISOString(),
   };
 
   const res = await fetch('/api/jadwal', {
@@ -108,38 +113,60 @@ export default function AdminJadwalPage() {
 
   // EDIT 
   const handleEdit = (item: Jadwal) => {
+  console.log('EDIT ITEM:', item);
+
   setIsEdit(true);
   setShowModal(true);
 
- setForm({
-  id: item.id,
-  date: item.date.split('T')[0],
-  location: item.location,
-  pelatihanId: item.pelatihanId,
-  metode: item.metode || '',
-  status: item.status || '',
-});
+  setForm({
+    id: item.id,
+    date: item.date?.split('T')[0] || '',
+    location: item.location || '',
+    pelatihanId: item.pelatihanId || '',
+    metode: item.metode || '',
+    status: item.status || '',
+  });
 };
 
   const handleUpdate = async () => {
-    if (!form.date || !form.location || !form.pelatihanId) {
-  alert('Semua field wajib diisi');
+  console.log('FORM ID:', form.id);
+
+  if (!form.id) {
+    alert('ID kosong');
+    return;
+  }
+
+    if (!form.date || !form.pelatihanId) {
+  alert('Tanggal & pelatihan wajib');
+  return;
+}
+
+if (form.metode === 'offline' && !form.location) {
+  alert('Lokasi wajib untuk offline');
   return;
 }
   const payload = {
     ...form,
     date: new Date(form.date).toISOString(),
   };
-
+  console.log('UPDATE ID:', form.id);
   const res = await fetch(`/api/jadwal/${form.id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+  method: 'PUT',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(payload),
+});
+console.log('CLICK UPDATE - selectedId:', selectedId);
+  let result;
 
-  const result = await res.json();
+try {
+  result = await res.json();
+} catch (err) {
+  console.error('JSON ERROR:', err);
+  alert('Response bukan JSON / API error');
+  return;
+}
   console.log('UPDATE RESULT:', result);
 
   if (!result.success) {
