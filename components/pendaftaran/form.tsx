@@ -1,20 +1,35 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createPendaftaran, getPelatihanList } from "@/server/pendaftaran";
+import { createPendaftaran, getPelatihanList, getJadwalByPelatihanId } from "@/server/pendaftaran";
 import { type PendaftaranInput } from "@/server/pendaftaran.schema";
+import { useSession } from "next-auth/react";
 
 // Tipe data untuk daftar pelatihan
 type PelatihanOption = {
   id: string;
   name: string;
+  tanggal: Date;
+  description?: string | null;
+};
+
+type JadwalOption = {
+  id: string;
+  date: Date;
+  location?: string | null;
+  status: string;
+  metode?: string | null;
 };
 
 export function PendaftaranForm() {
+  const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [pelatihanList, setPelatihanList] = useState<PelatihanOption[]>([]);
   const [isLoadingPelatihan, setIsLoadingPelatihan] = useState(true);
+  const [selectedPelatihanId, setSelectedPelatihanId] = useState<string>("");
+  const [jadwalList, setJadwalList] = useState<JadwalOption[]>([]);
+  const [isLoadingJadwal, setIsLoadingJadwal] = useState(false);
 
   // Mengambil daftar pelatihan saat komponen pertama kali dimuat
   useEffect(() => {
@@ -32,6 +47,39 @@ export function PendaftaranForm() {
     }
     fetchPelatihan();
   }, []);
+
+  // Mengambil jadwal ketika pelatihan dipilih
+  useEffect(() => {
+    if (!selectedPelatihanId) {
+      setJadwalList([]);
+      return;
+    }
+
+    async function fetchJadwal() {
+      setIsLoadingJadwal(true);
+      try {
+        const response = await getJadwalByPelatihanId(selectedPelatihanId);
+        if (response.success && response.data) {
+          setJadwalList(response.data);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data jadwal:", error);
+      } finally {
+        setIsLoadingJadwal(false);
+      }
+    }
+    fetchJadwal();
+  }, [selectedPelatihanId]);
+
+  // Helper untuk format tanggal
+  const formatTanggal = (date: Date) => {
+    return new Date(date).toLocaleDateString("id-ID", {
+      weekday: "short",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   // Helper untuk mengubah File menjadi Base64 (Data URL)
   const fileToBase64 = (file: File): Promise<string> => {
@@ -60,6 +108,8 @@ export function PendaftaranForm() {
         instansi: formData.get("instansi") as string,
         pelatihanId: formData.get("pelatihanId") as string,
         metode: formData.get("metode") as "ONLINE" | "OFFLINE",
+        userId: session?.user?.id, // Tambahkan userId dari session
+        jadwalId: formData.get("jadwalId") as string, // Tambahkan jadwalId
       };
 
       // Daftar field file yang wajib dan opsional sesuai skema
@@ -79,6 +129,8 @@ export function PendaftaranForm() {
       if (response.success) {
         setMessage({ type: "success", text: "Pendaftaran berhasil dikirim! Silakan tunggu konfirmasi selanjutnya." });
         (e.target as HTMLFormElement).reset(); // Kosongkan form setelah sukses
+        setSelectedPelatihanId("");
+        setJadwalList([]);
       } else {
         setMessage({ type: "error", text: response.error || "Terjadi kesalahan saat menyimpan data." });
       }
@@ -143,15 +195,41 @@ export function PendaftaranForm() {
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pilih Pelatihan <span className="text-red-500">*</span></label>
-              <select name="pelatihanId" required className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800" disabled={isLoadingPelatihan}>
+              <select 
+                name="pelatihanId" 
+                value={selectedPelatihanId}
+                onChange={(e) => setSelectedPelatihanId(e.target.value)}
+                required 
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800" 
+                disabled={isLoadingPelatihan}
+              >
                 <option value="">{isLoadingPelatihan ? "Memuat data pelatihan..." : "-- Pilih Pelatihan --"}</option>
                 {pelatihanList.map((pelatihan) => (
                   <option key={pelatihan.id} value={pelatihan.id}>
-                    {pelatihan.name}
+                    {pelatihan.name} - {formatTanggal(pelatihan.tanggal)}
                   </option>
                 ))}
               </select>
             </div>
+
+            {selectedPelatihanId && (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Pilih Jadwal <span className="text-red-500">*</span></label>
+                <select 
+                  name="jadwalId" 
+                  required 
+                  className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800" 
+                  disabled={isLoadingJadwal || jadwalList.length === 0}
+                >
+                  <option value="">{isLoadingJadwal ? "Memuat jadwal..." : jadwalList.length === 0 ? "Tidak ada jadwal tersedia" : "-- Pilih Jadwal --"}</option>
+                  {jadwalList.map((jadwal) => (
+                    <option key={jadwal.id} value={jadwal.id}>
+                      {formatTanggal(jadwal.date)} - {jadwal.location || "Lokasi TBD"} ({jadwal.metode || "Metode TBD"})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">Metode Pelatihan <span className="text-red-500">*</span></label>

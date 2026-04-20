@@ -81,14 +81,30 @@ export async function createPendaftaran(data: PendaftaranInput) {
     console.log("[PENDAFTARAN] Membuat record pendaftaran di database...");
     
     // Replace base64 strings di data dengan URL fisik sebelum masuk ke Prisma
-    const pendaftaranData = {
-      ...validatedData,
+    const pendaftaranData: any = {
+      namaLengkap: validatedData.namaLengkap,
+      email: validatedData.email,
+      noTelp: validatedData.noTelp,
+      pekerjaan: validatedData.pekerjaan,
+      instansi: validatedData.instansi,
+      metode: validatedData.metode,
+      pelatihanId: validatedData.pelatihanId,
       fotoKtp: fotoKtpUrl,
       ijazah: ijazahUrl,
       pasFoto: pasFotoUrl,
       buktiTransfer: buktiTransferUrl,
       suratKerja: suratKerjaUrl || undefined,
     };
+
+    // Tambahkan userId jika ada
+    if (validatedData.userId) {
+      pendaftaranData.userId = validatedData.userId;
+    }
+
+    // Tambahkan jadwalId jika ada
+    if (validatedData.jadwalId) {
+      pendaftaranData.jadwalId = validatedData.jadwalId;
+    }
 
     // Create pendaftaran
     const pendaftaran = await prisma.pendaftaran.create({
@@ -141,15 +157,22 @@ export async function getPendaftaranByEmail(email: string) {
 
 export async function getPelatihanList() {
   try {
+    const now = new Date();
     const pelatihans = await prisma.pelatihan.findMany({
-      where: { status: true },
+      where: { 
+        status: true,
+        tanggal: {
+          gte: now, // Hanya pelatihan yang tanggalnya belum lewat
+        },
+      },
       select: {
         id: true,
         name: true,
         tanggal: true,
+        description: true,
       },
       orderBy: {
-        tanggal: "desc",
+        tanggal: "asc", // Urutkan dari yang paling dekat
       },
     });
 
@@ -161,6 +184,36 @@ export async function getPelatihanList() {
     return {
       success: false,
       error: "Gagal mengambil daftar pelatihan",
+    };
+  }
+}
+
+export async function getJadwalByPelatihanId(pelatihanId: string) {
+  try {
+    const jadwals = await prisma.jadwal.findMany({
+      where: { 
+        pelatihanId,
+      },
+      select: {
+        id: true,
+        date: true,
+        location: true,
+        status: true,
+        metode: true,
+      },
+      orderBy: {
+        date: "asc",
+      },
+    });
+
+    return {
+      success: true,
+      data: jadwals,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: "Gagal mengambil data jadwal",
     };
   }
 }
