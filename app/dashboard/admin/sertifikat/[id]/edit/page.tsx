@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Loader2, Save, ArrowLeft } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Loader2, Save, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 
 const sertifikatSchema = z.object({
@@ -18,165 +18,112 @@ export default function EditSertifikatPage() {
 
   const [isFetchingData, setIsFetchingData] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  
   const [formData, setFormData] = useState({
     namaPeserta: "",
-    status: "",
+    status: "LULUS",
     issuedAt: "",
   });
 
-  const [formErrors, setFormErrors] = useState<{ [key: string]: string[] }>({});
-  const [notification, setNotification] = useState<{ type: "success" | "error", message: string } | null>(null);
-
   useEffect(() => {
-    const fetchDetail = async () => {
+    const fetchSertifikat = async () => {
       try {
         const res = await fetch(`/api/sertifikat/${sertifikatId}`);
+        const data = await res.json();
         if (res.ok) {
-          const detail = await res.json();
           setFormData({
-            namaPeserta: detail.pendaftaran?.user?.name || "",
-            status: detail.pendaftaran?.status || "LULUS",
-            issuedAt: new Date(detail.issuedAt).toISOString().split("T")[0],
+            namaPeserta: data.pendaftaran?.user?.name || "",
+            status: data.pendaftaran?.status || "LULUS",
+            issuedAt: data.issuedAt ? new Date(data.issuedAt).toISOString().split('T')[0] : "",
           });
-        } else {
-          throw new Error("Sertifikat tidak ditemukan");
         }
-      } catch {
-        setNotification({ type: "error", message: "Gagal memuat data dari server." });
+      } catch (error) {
+        console.error("Failed to fetch", error);
       } finally {
         setIsFetchingData(false);
       }
     };
-
-    if (sertifikatId) fetchDetail();
+    fetchSertifikat();
   }, [sertifikatId]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (formErrors[e.target.name]) setFormErrors({ ...formErrors, [e.target.name]: [] });
-    if (notification?.type === "error") setNotification(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNotification(null);
-    
-    const validation = sertifikatSchema.safeParse(formData);
-    if (!validation.success) {
-      setFormErrors(validation.error.flatten().fieldErrors);
-      setNotification({ type: "error", message: "Mohon lengkapi form dengan benar sebelum menyimpan." });
-      return;
-    }
-
     setIsLoading(true);
+    
     try {
-      const response = await fetch(`/api/sertifikat/${sertifikatId}`, {
+      // Validasi ringan dengan Zod
+      sertifikatSchema.parse(formData);
+      
+      const res = await fetch(`/api/sertifikat/${sertifikatId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.error || "Gagal mengubah data");
-      }
-
-      setNotification({ type: "success", message: "Data berhasil diperbarui dan Sertifikat di-generate ulang!" });
-      setTimeout(() => {
+      if (res.ok) {
         router.push("/dashboard/admin/sertifikat");
-        router.refresh(); 
-      }, 1500);
-
+      } else {
+        alert("Gagal mengupdate sertifikat.");
+      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Gagal mengubah data";
-      setNotification({ type: "error", message });
+      console.error(error);
+      alert("Pastikan semua form terisi dengan benar.");
+    } finally {
       setIsLoading(false);
     }
   };
 
-  if (isFetchingData) {
-    return <div className="flex justify-center items-center h-[400px]"><Loader2 className="w-8 h-8 animate-spin text-blue-600" /></div>;
-  }
+  if (isFetchingData) return <div className="p-10 flex justify-center"><Loader2 className="animate-spin w-8 h-8 text-blue-600" /></div>;
 
   return (
-    <div className="max-w-3xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden transition-colors">
-      <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between bg-gray-50 dark:bg-gray-900">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Edit & Re-Generate Sertifikat</h2>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ubah nama, status kelulusan, atau tanggal terbit dengan mudah.</p>
-        </div>
-        <button onClick={() => router.push("/dashboard/admin/sertifikat")} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Batal
+    <div className="max-w-2xl mx-auto space-y-6">
+      <div className="flex items-center gap-4">
+        <button onClick={() => router.back()} className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg">
+          <ArrowLeft className="w-5 h-5 text-gray-700" />
         </button>
+        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Edit Sertifikat</h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-8 flex flex-col gap-6">
-        
-        {notification && (
-          <div className={`px-4 py-3 rounded-lg text-sm font-medium ${notification.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-            {notification.message}
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 dark:bg-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-700">
-          
-          {/* Input 1: NAMA BISA DIUBAH SESUKA HATI */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
-              Nama Peserta <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="namaPeserta"
-              value={formData.namaPeserta}
-              onChange={handleChange}
-              className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${formErrors.namaPeserta ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
-              placeholder="Masukkan nama untuk sertifikat"
-            />
-            {formErrors.namaPeserta && <p className="text-red-500 text-xs mt-1">{formErrors.namaPeserta[0]}</p>}
-          </div>
-
-          {/* Input 2: STATUS BISA DIUBAH */}
-          <div className="md:col-span-1">
-            <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
-              Status Pendaftaran <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleChange}
-              className={`w-full px-3 py-2.5 border rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${formErrors.status ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
-            >
-              <option value="LULUS">LULUS</option>
-              <option value="PROSES">PROSES</option>
-              <option value="MENUNGGU">MENUNGGU</option>
-              <option value="GAGAL">GAGAL</option>
-            </select>
-            {formErrors.status && <p className="text-red-500 text-xs mt-1">{formErrors.status[0]}</p>}
-          </div>
+      <form onSubmit={handleSubmit} className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Nama Peserta</label>
+          <input
+            type="text"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            value={formData.namaPeserta}
+            onChange={(e) => setFormData({ ...formData, namaPeserta: e.target.value })}
+          />
         </div>
 
-        {/* Input 3: TANGGAL TERBIT */}
         <div>
-          <label className="block text-sm font-medium text-gray-900 dark:text-gray-200 mb-2">
-            Tanggal Terbit <span className="text-red-500">*</span>
-          </label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Status Pendaftaran</label>
+          <select
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+            value={formData.status}
+            onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+          >
+            <option value="LULUS">LULUS (Generate/Update PDF)</option>
+            <option value="TIDAK LULUS">TIDAK LULUS (Cabut Sertifikat)</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Terbit</label>
           <input
             type="date"
-            name="issuedAt"
+            className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
             value={formData.issuedAt}
-            onChange={handleChange}
-            className={`w-full px-4 py-2.5 border rounded-lg text-sm bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${formErrors.issuedAt ? 'border-red-500' : 'border-gray-300 dark:border-gray-700'}`}
+            onChange={(e) => setFormData({ ...formData, issuedAt: e.target.value })}
           />
-          {formErrors.issuedAt && <p className="text-red-500 text-xs mt-1">{formErrors.issuedAt[0]}</p>}
         </div>
 
-        <div className="pt-4 flex justify-end border-t border-gray-200 dark:border-gray-800 mt-2">
-          <button type="submit" disabled={isLoading} className="px-6 py-2.5 text-sm font-medium text-white bg-[#1a56db] hover:bg-blue-700 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
-            {isLoading ? <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</> : <><Save className="w-4 h-4" /> Simpan & Generate Ulang</>}
-          </button>
-        </div>
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full bg-[#1a56db] hover:bg-blue-700 text-white px-5 py-3 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition-colors disabled:opacity-70"
+        >
+          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+          {isLoading ? "Menyimpan & Re-generate PDF..." : "Simpan Perubahan"}
+        </button>
       </form>
     </div>
   );
