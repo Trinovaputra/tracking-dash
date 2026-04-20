@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // ============================================================================
 // HELPER FUNCTION: Menyimpan Base64 menjadi file fisik
@@ -46,15 +48,30 @@ async function saveBase64File(base64Data: string, prefix: string): Promise<strin
 
 export async function createPendaftaran(data: PendaftaranInput) {
   try {
+    console.log("[PENDAFTARAN] Mengecek session user...");
+    const session = await getServerSession(authOptions);
+
+    // Validasi user sudah login
+    if (!session?.user?.id) {
+      console.log("[PENDAFTARAN] ✗ User belum login");
+      return {
+        success: false,
+        error: "Anda harus login terlebih dahulu",
+      };
+    }
+
+    const userId = session.user.id;
+    console.log("[PENDAFTARAN] ✓ User terautentikasi: ID=", userId);
+
     console.log("[PENDAFTARAN] Memvalidasi data dengan Zod...");
     const validatedData = pendaftaranSchema.parse(data);
 
-    // Check apakah user sudah mendaftar pelatihan ini
-    console.log(`[PENDAFTARAN] Checking duplikat: email=${validatedData.email}, pelatihanId=${validatedData.pelatihanId}`);
+    // Check apakah user sudah mendaftar jadwal ini
+    console.log(`[PENDAFTARAN] Checking duplikat: email=${validatedData.email}, jadwalId=${validatedData.jadwalId}`);
     const existing = await prisma.pendaftaran.findFirst({
       where: {
         email: validatedData.email,
-        pelatihanId: validatedData.pelatihanId,
+        jadwalId: validatedData.jadwalId,
       },
     });
 
@@ -80,6 +97,7 @@ export async function createPendaftaran(data: PendaftaranInput) {
 
     console.log("[PENDAFTARAN] Membuat record pendaftaran di database...");
     
+<<<<<<< HEAD
     // Replace base64 strings di data dengan URL fisik sebelum masuk ke Prisma
     const pendaftaranData: any = {
       namaLengkap: validatedData.namaLengkap,
@@ -89,11 +107,17 @@ export async function createPendaftaran(data: PendaftaranInput) {
       instansi: validatedData.instansi,
       metode: validatedData.metode,
       pelatihanId: validatedData.pelatihanId,
+=======
+    // Replace base64 strings di data dengan URL fisik dan INJECT userId sebelum masuk ke Prisma
+    const pendaftaranData = {
+      ...validatedData,
+>>>>>>> 8c6b9d81fab79cf49f2ef92fac7dd999ad3ab543
       fotoKtp: fotoKtpUrl,
       ijazah: ijazahUrl,
       pasFoto: pasFotoUrl,
       buktiTransfer: buktiTransferUrl,
       suratKerja: suratKerjaUrl || undefined,
+      userId,
     };
 
     // Tambahkan userId jika ada
@@ -155,8 +179,9 @@ export async function getPendaftaranByEmail(email: string) {
   }
 }
 
-export async function getPelatihanList() {
+export async function getJadwalList() {
   try {
+<<<<<<< HEAD
     const now = new Date();
     const pelatihans = await prisma.pelatihan.findMany({
       where: { 
@@ -173,17 +198,45 @@ export async function getPelatihanList() {
       },
       orderBy: {
         tanggal: "asc", // Urutkan dari yang paling dekat
+=======
+    const jadwals = await prisma.jadwal.findMany({
+      where: {
+        pelatihan: { status: true },
+      },
+      select: {
+        id: true,
+        date: true,
+        metode: true,
+        pelatihanId: true,
+        pelatihan: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        date: "asc",
+>>>>>>> 8c6b9d81fab79cf49f2ef92fac7dd999ad3ab543
       },
     });
 
+    // Transform data untuk match dengan JadwalOption type
+    const transformedData = jadwals.map((jadwal) => ({
+      id: jadwal.id,
+      date: jadwal.date,
+      metode: jadwal.metode,
+      pelatihanId: jadwal.pelatihanId,
+      pelatihanName: jadwal.pelatihan.name,
+    }));
+
     return {
       success: true,
-      data: pelatihans,
+      data: transformedData,
     };
   } catch (error) {
     return {
       success: false,
-      error: "Gagal mengambil daftar pelatihan",
+      error: "Gagal mengambil daftar jadwal",
     };
   }
 }
