@@ -32,25 +32,18 @@ export function PelatihanForm({ initialData, isEdit }: FormProps) {
     watch,
     formState: { errors },
   } = useForm<PelatihanFormInput>({
-    resolver: zodResolver(pelatihanSchema),
-    defaultValues: initialData
-    ? {
-        name: initialData.name,
-        description: initialData.description ?? "",
-        image: initialData.image ?? "",
-        status: initialData.status,
-      }
-    : {
-        name: "",
-        description: "",
-        image: "",
-        status: true,
-      },
+    resolver: zodResolver(pelatihanSchema) as any, 
+    defaultValues: {
+      name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
+      image: initialData?.image ?? "",
+      status: initialData?.status ?? true,
+    },
   });
 
   const isStatusActive = watch("status");
 
-  const onSubmit = async (data: PelatihanFormInput) => {
+  const onSubmit: SubmitHandler<PelatihanFormInput> = async (data) => {
     setLoading(true);
     setError(null);
     
@@ -70,7 +63,7 @@ export function PelatihanForm({ initialData, isEdit }: FormProps) {
   return (
     <Card className="max-w-2xl mt-6 shadow-sm border-gray-100">
       <CardContent className="pt-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit as any)} className="space-y-6">
           {error && <div className="text-red-500 text-sm font-medium">{error}</div>}
 
           <div className="space-y-2">
