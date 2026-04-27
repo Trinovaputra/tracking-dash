@@ -278,7 +278,6 @@ export async function getUserAbsensiStatus(userId: string, jadwalId?: string) {
     if (jadwalId) {
       where.pendaftaran = {
         ...where.pendaftaran,
-        jadwalId,
       }
     }
 

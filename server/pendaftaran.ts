@@ -70,7 +70,7 @@ export async function createPendaftaran(data: PendaftaranInput) {
     console.log(`[PENDAFTARAN] Checking duplikat: email=${validatedData.email}, jadwalId=${validatedData.jadwalId}`);
     const existing = await prisma.pendaftaran.findFirst({
       where: {
-        email: validatedData.email,
+        userId: userId,
         jadwalId: validatedData.jadwalId,
       },
     });

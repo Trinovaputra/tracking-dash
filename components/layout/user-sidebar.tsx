@@ -19,9 +19,9 @@ const sidebarItems = [
   { name: "Pendaftaran", href: "/dashboard/user/pendaftaran", icon: FileText },
   { name: "Jadwal Saya", href: "/dashboard/user/jadwal", icon: CalendarDays },
   { name: "Absensi", href: "/dashboard/user/absensi", icon: CheckSquare },
-  { name: "Progress", href: "/dashboard/user/progress", icon: TrendingUp },
+  // { name: "Progress", href: "/dashboard/user/progress", icon: TrendingUp },
   { name: "Sertifikat", href: "/dashboard/user/sertifikat", icon: Award },
-  { name: "Profil", href: "/dashboard/user/profil", icon: User },
+  // { name: "Profil", href: "/dashboard/user/profil", icon: User },
 ]
 
 interface SidebarProps {

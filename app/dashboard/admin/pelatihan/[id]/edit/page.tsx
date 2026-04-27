@@ -18,13 +18,12 @@ export default async function EditPelatihanPage({ params }: PageProps) {
 
   // Map the database model to the form input format
   const initialData = {
-    id: data.id,
-    name: data.name,
-    description: data.description || undefined,
-    image: data.image || undefined,
-    duration: data.duration,
-    status: data.status,
-  };
+  id: data.id,
+  name: data.name,
+  description: data.description ?? "",
+  image: data.image ?? "",
+  status: data.status ?? true,
+};
 
   return (
     <div className="space-y-6">

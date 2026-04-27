@@ -8,7 +8,12 @@ export const pelatihanSchema = z.object({
 });
 
 // 🔥 TYPE UNTUK FORM
-export type PelatihanFormInput = z.infer<typeof pelatihanSchema>;
+export type PelatihanFormInput = {
+  name: string;
+  description?: string | null;
+  image?: string | null;
+  status: boolean; // Pastikan ini murni boolean, bukan optional
+};
 
 // 🔥 TYPE UNTUK DATABASE
 export type PelatihanInput = z.infer<typeof pelatihanSchema>;
