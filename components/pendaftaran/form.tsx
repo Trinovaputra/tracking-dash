@@ -76,7 +76,7 @@ export function PendaftaranForm() {
           const uploadResult = await uploadRes.json();
 
           if (uploadResult.success) {
-            // Simpan URL dari UploadThing (https://utfs.io/...) ke objek data
+            // Simpan URL dari UploadThing (https://utfs.io/....) ke objek data
             data[field] = uploadResult.url;
           } else {
             throw new Error(`Gagal mengunggah ${field}`);
