@@ -11,8 +11,16 @@ export async function POST(req: Request) {
       return Response.json({ success: false, message: "File tidak ditemukan" });
     }
 
-    // Langsung lempar file yang ditangkap ke UploadThing
-    const uploadResponse = await utapi.uploadFiles(file);
+    // --- PERBAIKAN: "Cuci" Web File menjadi Node Buffer ---
+    // 1. Ekstrak data mentah dari file browser
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
+
+    // 2. Bungkus ulang menjadi File yang bersih dan dikenali oleh UploadThing
+    const cleanFile = new File([buffer], file.name, { type: file.type });
+
+    // 3. Lempar ke UploadThing
+    const uploadResponse = await utapi.uploadFiles(cleanFile);
 
     if (uploadResponse.error) {
       throw new Error(uploadResponse.error.message);
@@ -20,10 +28,10 @@ export async function POST(req: Request) {
 
     return Response.json({
       success: true,
-      url: uploadResponse.data.url, // Mengembalikan link permanen https://utfs.io/...
+      url: uploadResponse.data.url, // URL permanen utfs.io
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error("UPLOAD ERROR:", error);
-    return Response.json({ success: false, message: "Upload gagal" }, { status: 500 });
+    return Response.json({ success: false, message: error.message || "Upload gagal" }, { status: 500 });
   }
 }
