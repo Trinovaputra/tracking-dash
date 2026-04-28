@@ -199,3 +199,112 @@ export async function getJadwalList() {
     };
   }
 }
+
+// ============================================================================
+// GET USER DASHBOARD DATA
+// ============================================================================
+export async function getUserDashboardData() {
+  try {
+    const session = await getServerSession(authOptions);
+    
+    if (!session?.user?.id) {
+      return {
+        success: false,
+        error: "User tidak terautentikasi",
+      };
+    }
+
+    const userId = session.user.id;
+
+    // Ambil semua pendaftaran user dengan relasi
+    const pendaftarans = await prisma.pendaftaran.findMany({
+      where: { userId },
+      include: {
+        pelatihan: true,
+        jadwal: true,
+        absensis: true,
+        sertifikats: true,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // Hitung progress dan kumpulkan data
+    const activePelatihan = pendaftarans
+      .filter((p) => ["MENUNGGU", "PROSES"].includes(p.status))
+      .map((p) => ({
+        id: p.id,
+        nama: p.pelatihan.name,
+        status: p.status,
+        tanggal: p.jadwal.date,
+        hasAbsensi: p.absensis.length > 0,
+      }))
+      .sort((a) => (a.hasAbsensi ? -1 : 1))[0] || null;
+
+    // Hitung progress berdasarkan aktivitas terbaru
+    let progressPercent = 0;
+    let progressText = "Belum daftar pelatihan";
+
+    if (pendaftarans.length === 0) {
+      progressPercent = 0;
+      progressText = "Belum daftar pelatihan";
+    } else {
+      const sortedByStatus = pendaftarans.sort((a, b) => {
+        const statusOrder = { LULUS: 4, GAGAL: 1, PROSES: 2, MENUNGGU: 2 };
+        return (statusOrder[b.status as keyof typeof statusOrder] || 0) - 
+               (statusOrder[a.status as keyof typeof statusOrder] || 0);
+      });
+
+      const latest = sortedByStatus[0];
+
+      if (latest.status === "LULUS") {
+        progressPercent = 100;
+        progressText = "Pelatihan Selesai (Lulus)";
+      } else if (latest.status === "GAGAL") {
+        progressPercent = 0;
+        progressText = "Pelatihan Tidak Lulus";
+      } else if (latest.absensis.length > 0) {
+        progressPercent = 75;
+        progressText = "Sedang Pelatihan (Absen)";
+      } else if (["MENUNGGU", "PROSES"].includes(latest.status)) {
+        progressPercent = 25;
+        progressText = "Sudah Daftar";
+      }
+    }
+
+    // Riwayat pelatihan (yang sudah selesai/gagal)
+    const riwayatPelatihan = pendaftarans
+      .filter((p) => ["LULUS", "GAGAL"].includes(p.status))
+      .map((p) => ({
+        id: p.id,
+        nama: p.pelatihan.name,
+        status: p.status,
+        tanggal: p.createdAt,
+        sertifikat: p.sertifikats.length > 0,
+      }));
+
+    // Total sertifikat (dari pendaftaran yang LULUS)
+    const totalSertifikat = pendaftarans
+      .filter((p) => p.status === "LULUS")
+      .reduce((sum, p) => sum + p.sertifikats.length, 0);
+
+    return {
+      success: true,
+      data: {
+        progressPercent,
+        progressText,
+        activePelatihan,
+        riwayatPelatihan,
+        totalSertifikat,
+        totalPendaftaran: pendaftarans.length,
+      },
+    };
+  } catch (error) {
+    console.error("[DASHBOARD] Error:", error);
+    return {
+      success: false,
+      error: "Gagal mengambil data dashboard",
+    };
+  }
+}

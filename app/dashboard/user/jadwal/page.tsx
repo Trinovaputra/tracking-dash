@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 
 type Jadwal = {
@@ -18,6 +19,7 @@ type Pelatihan = {
 };
 
 export default function JadwalUserPage() {
+  const router = useRouter();
   const [filter, setFilter] = useState('semua');
   const [filterMetode, setFilterMetode] = useState('semua');
 const [filterPelatihan, setFilterPelatihan] = useState('semua');
@@ -233,18 +235,18 @@ const filteredData = data.filter((item) => {
               </span>
 
               {/* Button */}
-              <button
-  disabled={item.status === 'done'}
-  onClick={() => alert('Daftar ke ' + item.id)}
-  className={`mt-5 w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-300
-    ${
-      item.status === 'done'
-        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-        : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg'
-    }`}
->
-  {item.status === 'done' ? 'Selesai' : 'Daftar Sekarang'}
-</button>
+                <button
+                  disabled={item.status === 'done'}
+                  onClick={() => router.push(`/dashboard/user/pendaftaran?jadwalId=${item.id}`)}
+                  className={`mt-5 w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-300
+                    ${
+                      item.status === 'done'
+                        ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg'
+                    }`}
+                >
+                {item.status === 'done' ? 'Selesai' : 'Daftar Sekarang'}
+              </button>
             </div>
           ))}
         </div>

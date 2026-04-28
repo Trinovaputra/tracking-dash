@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { createPendaftaran, getJadwalList } from "@/server/pendaftaran";
 import { type PendaftaranInput, type JadwalOption } from "@/server/pendaftaran.schema";
 
 export function PendaftaranForm() {
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [jadwalList, setJadwalList] = useState<(JadwalOption & { pelatihanId: string })[]>([]);
@@ -20,7 +22,21 @@ export function PendaftaranForm() {
       try {
         const response = await getJadwalList();
         if (response.success && response.data) {
-          setJadwalList(response.data as any);
+          const jadwals = response.data as any;
+          setJadwalList(jadwals);
+
+          // Auto-select jadwal dari query parameter jika ada
+          const jadwalIdParam = searchParams.get("jadwalId");
+          if (jadwalIdParam) {
+            const jadwal = jadwals.find((j: any) => j.id === jadwalIdParam);
+            if (jadwal) {
+              setSelectedJadwal({
+                jadwalId: jadwal.id,
+                pelatihanId: jadwal.pelatihanId,
+                metode: jadwal.metode,
+              });
+            }
+          }
         }
       } catch (error) {
         console.error("Gagal mengambil data jadwal:", error);
@@ -29,7 +45,7 @@ export function PendaftaranForm() {
       }
     }
     fetchJadwal();
-  }, []);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -169,6 +185,7 @@ export function PendaftaranForm() {
               </label>
               <select
                 required
+                value={selectedJadwal?.jadwalId || ""}
                 className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800"
                 disabled={isLoadingJadwal}
                 onChange={(e) => {
@@ -205,11 +222,22 @@ export function PendaftaranForm() {
               <label className="block text-sm font-medium mb-1 text-gray-700 dark:text-gray-300">
                 Metode Pelatihan <span className="text-red-500">*</span>
               </label>
-              <select name="metode" required className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+              <select 
+                name="metode" 
+                required 
+                value={selectedJadwal?.metode === "online" ? "ONLINE" : selectedJadwal?.metode === "offline" ? "OFFLINE" : ""}
+                disabled={!selectedJadwal}
+                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white disabled:bg-gray-100 disabled:dark:bg-gray-800 disabled:cursor-not-allowed"
+              >
                 <option value="">-- Pilih Metode --</option>
                 <option value="ONLINE">Online (Daring)</option>
                 <option value="OFFLINE">Offline (Tatap Muka)</option>
               </select>
+              {selectedJadwal && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  ℹ️ Metode otomatis terisi berdasarkan jadwal yang dipilih
+                </p>
+              )}
             </div>
 
             <div>
