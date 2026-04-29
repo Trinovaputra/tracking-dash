@@ -207,7 +207,7 @@ export default function JadwalUserPage() {
                 disabled={item.status === "done"}
                 onClick={() => router.push(`/dashboard/user/pendaftaran?jadwalId=${item.id}`)}
                 className={`mt-5 w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-300
-                    ${item.status === "done" ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg"}`}
+                    ${item.status === "done" ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-linear-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg"}`}
               >
                 {item.status === "done" ? "Selesai" : "Daftar Sekarang"}
               </button>
