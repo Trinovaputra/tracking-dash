@@ -133,7 +133,7 @@ const filteredData = data.filter((item) => {
 });
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Jadwal Pelatihan</h1>
+      <h1 className="text-2xl font-bold mb-6 dark:text-white">Jadwal Pelatihan</h1>
      <div className="flex flex-wrap gap-3 mb-6 items-center">
 
         <input
@@ -141,8 +141,8 @@ const filteredData = data.filter((item) => {
   placeholder="🔍 Cari pelatihan..."
   value={search}
   onChange={(e) => setSearch(e.target.value)}
-  className="w-full mb-4 border border-black rounded-xl px-4 py-2 text-sm 
-             focus:outline-none focus:ring-2 focus:ring-blue-400"
+  className="w-full mb-4 border border-gray-300 dark:border-slate-600 rounded-xl px-4 py-2 text-sm 
+             focus:outline-none focus:ring-2 focus:ring-blue-400 dark:bg-slate-800 dark:text-white"
 />
   
   {/* FILTER METODE */}
@@ -155,7 +155,7 @@ const filteredData = data.filter((item) => {
           ${
             filterMetode === f
               ? 'bg-blue-500 text-white shadow'
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-600'
+              : 'bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-600 dark:text-white'
           }`}
       >
         {f}
@@ -168,8 +168,8 @@ const filteredData = data.filter((item) => {
   <select
     className="
       w-full h-10 px-3 pr-10
-      border border-gray-300 rounded-xl
-      text-sm bg-white
+      border border-gray-300 dark:border-slate-600 rounded-xl
+      text-sm bg-white dark:bg-slate-800 dark:text-white
       appearance-none
       focus:outline-none focus:ring-2 focus:ring-blue-500
     "
@@ -183,7 +183,7 @@ const filteredData = data.filter((item) => {
   </select>
 
   {/* ICON */}
-  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none">
+  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-slate-400 pointer-events-none">
     ▼
   </span>
 </div>
@@ -191,7 +191,7 @@ const filteredData = data.filter((item) => {
 </div>
 
       {filteredData.length === 0 ? (
-  <p className="text-center text-gray-400">
+  <p className="text-center text-gray-400 dark:text-slate-500">
     🚫 Tidak ada jadwal yang tersedia
   </p>
 ) : (
@@ -199,27 +199,27 @@ const filteredData = data.filter((item) => {
     {filteredData.map((item) => (
             <div
   key={item.id}
-  className="group border border-gray-200 rounded-2xl p-5 bg-white 
+  className="group border border-gray-200 dark:border-slate-700 rounded-2xl p-5 bg-white dark:bg-slate-800 
              shadow-sm hover:shadow-xl hover:-translate-y-1 
              transition-all duration-300"
 >
               {/* Nama Pelatihan */}
-              <h2 className="text-lg font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition">
+              <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white group-hover:text-blue-600 transition">
   {getPelatihanName(item.pelatihanId)}
 </h2>
 
               {/* Tanggal */}
-              <p className="text-sm text-gray-500 mb-2">
+              <p className="text-sm text-gray-500 dark:text-slate-400 mb-2">
                 📅 {formatDate(item.date)}
               </p>
 
               {/* Metode */}
-              <p>
+              <p className="dark:text-white">
   {item.metode === 'online' ? '💻 Online' : '🏢 Offline'}
 </p>
 
               {/* Lokasi */}
-              <p className="text-sm mb-3">
+              <p className="text-sm mb-3 dark:text-slate-300">
                 📍 {item.metode === 'offline' ? item.location : 'Online'}
               </p>
 

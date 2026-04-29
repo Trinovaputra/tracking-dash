@@ -1,11 +1,7 @@
 import { pool } from "@/lib/db";
 import { randomUUID } from "crypto";
-import { prisma } from "@/lib/prisma";
-<<<<<<< HEAD
+import { prisma } from "@/lib/prisma"
 import { pendaftaranSchema, type PendaftaranInput } from "@/server/pendaftaran.schema";
-=======
-import { buildCertificatePDF } from "@/lib/generateSertifikat";
->>>>>>> 9e897c3ead7b074f21c607b8e9b02a24f13a896b
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +37,6 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-<<<<<<< HEAD
     
     // Handle two types of POST requests:
     // 1. From form (via createPendaftaran Server Action) - sudah dihandle di server/pendaftaran.ts
@@ -114,22 +109,6 @@ export async function POST(req: Request) {
         pelatihan: true,
       },
     });
-=======
-    const { userId, jadwalId, documentUrl, status = "MENUNGGU" } = body;
-
-    if (!userId || !jadwalId) {
-      return Response.json({ success: false, message: "userId dan jadwalId wajib diisi" }, { status: 400 });
-    }
-
-    const id = randomUUID();
-    const result = await pool.query(
-      `INSERT INTO "Pendaftaran"
-        ("id", "userId", "jadwalId", "documentUrl", status, "createdAt", "updatedAt")
-       VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
-       RETURNING *`,
-      [id, String(userId), String(jadwalId), documentUrl, status],
-    );
->>>>>>> 9e897c3ead7b074f21c607b8e9b02a24f13a896b
 
     return Response.json({ 
       success: true, 
@@ -137,16 +116,11 @@ export async function POST(req: Request) {
       message: 'Pendaftaran berhasil dibuat via API'
     });
   } catch (error: any) {
-<<<<<<< HEAD
     console.error('POST ERROR:', error);
     return Response.json(
       { success: false, message: error.message || 'Gagal membuat pendaftaran' },
       { status: 500 }
     );
-=======
-    console.error("POST ERROR:", error);
-    return Response.json({ success: false, message: error.message }, { status: 500 });
->>>>>>> 9e897c3ead7b074f21c607b8e9b02a24f13a896b
   }
 }
 

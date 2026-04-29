@@ -25,7 +25,7 @@ export function AdminSidebar() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col w-64 bg-blue-600 text-white min-h-screen hidden md:flex">
+    <div className="flex flex-col w-64 bg-blue-600 dark:bg-slate-900 text-white min-h-screen hidden md:flex">
       <div className="flex items-center gap-2 p-6 mb-4">
         <Building2 className="h-6 w-6 text-white" />
         <span className="text-xl font-bold tracking-tight">Sertifikasi BNSP</span>
@@ -42,7 +42,7 @@ export function AdminSidebar() {
               className={`flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
                 isActive 
                   ? "bg-white text-blue-600 font-medium" 
-                  : "text-blue-100 hover:bg-blue-700 hover:text-white"
+                  : "text-blue-100 hover:bg-blue-700 dark:hover:bg-slate-800 hover:text-white"
               }`}
             >
               <item.icon className="h-5 w-5" />
@@ -52,7 +52,7 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-blue-500">
+      <div className="p-4 border-t border-blue-500 dark:border-slate-700">
         <div className="flex items-center gap-3 px-4 py-2">
           <div className="h-8 w-8 rounded-full bg-blue-400 flex items-center justify-center font-bold">
             A
