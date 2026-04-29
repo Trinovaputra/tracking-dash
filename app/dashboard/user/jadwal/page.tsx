@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Jadwal = {
   id: string;
@@ -19,11 +19,11 @@ type Pelatihan = {
 
 export default function JadwalUserPage() {
   const router = useRouter();
-  const [filter, setFilter] = useState('semua');
-  const [filterMetode, setFilterMetode] = useState('semua');
-  const [filterPelatihan, setFilterPelatihan] = useState('semua');
-  const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [filter, setFilter] = useState("semua");
+  const [filterMetode, setFilterMetode] = useState("semua");
+  const [filterPelatihan, setFilterPelatihan] = useState("semua");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [data, setData] = useState<Jadwal[]>([]);
   const [pelatihanList, setPelatihanList] = useState<Pelatihan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +31,9 @@ export default function JadwalUserPage() {
   const handleUpdateJadwal = async (id: string, updatedData: any) => {
     try {
       const res = await fetch(`/api/jadwal/${id}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         // Pastikan updatedData berisi { date, location, pelatihanId, metode, status }
         body: JSON.stringify(updatedData),
@@ -42,20 +42,20 @@ export default function JadwalUserPage() {
       const json = await res.json();
 
       if (json.success) {
-        alert('Jadwal berhasil diupdate!');
+        alert("Jadwal berhasil diupdate!");
         // Refresh data di layar agar perubahannya langsung terlihat
         fetchData();
       } else {
-        alert('Gagal update: ' + json.message);
+        alert("Gagal update: " + json.message);
       }
     } catch (error) {
-      console.error('Error updating jadwal:', error);
-      alert('Terjadi kesalahan pada sistem.');
+      console.error("Error updating jadwal:", error);
+      alert("Terjadi kesalahan pada sistem.");
     }
   };
 
   const fetchData = async () => {
-    const res = await fetch('/api/jadwal');
+    const res = await fetch("/api/jadwal");
     const json = await res.json();
 
     if (json.success) {
@@ -64,7 +64,7 @@ export default function JadwalUserPage() {
   };
 
   const fetchPelatihan = async () => {
-    const res = await fetch('/api/pelatihan');
+    const res = await fetch("/api/pelatihan");
     const json = await res.json();
 
     if (json.success) {
@@ -84,29 +84,29 @@ export default function JadwalUserPage() {
   }, [search]);
 
   const getPelatihanName = (id: string) => {
-    return pelatihanList.find((p) => p.id === id)?.name || '-';
+    return pelatihanList.find((p) => p.id === id)?.name || "-";
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
+    return new Date(date).toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
     });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'done':
-        return 'bg-green-100 text-green-700';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-700';
-      case 'on going':
-        return 'bg-blue-100 text-blue-700';
-      case 'reschedule':
-        return 'bg-red-100 text-red-700';
+      case "done":
+        return "bg-green-100 text-green-700";
+      case "pending":
+        return "bg-yellow-100 text-yellow-700";
+      case "on going":
+        return "bg-blue-100 text-blue-700";
+      case "reschedule":
+        return "bg-red-100 text-red-700";
       default:
-        return 'bg-gray-100 text-gray-600';
+        return "bg-gray-100 text-gray-600";
     }
   };
 
@@ -114,11 +114,11 @@ export default function JadwalUserPage() {
     return <p className="text-center mt-10">Loading jadwal...</p>;
   }
   const filteredData = data.filter((item) => {
-    const matchMetode = filterMetode === 'semua' || item.metode === filterMetode;
+    const matchMetode = filterMetode === "semua" || item.metode === filterMetode;
 
-    const matchPelatihan = filterPelatihan === 'semua' || item.pelatihanId === filterPelatihan;
+    const matchPelatihan = filterPelatihan === "semua" || item.pelatihanId === filterPelatihan;
 
-    const namaPelatihan = pelatihanList.find((p) => p.id === item.pelatihanId)?.name.toLowerCase() || '';
+    const namaPelatihan = pelatihanList.find((p) => p.id === item.pelatihanId)?.name.toLowerCase() || "";
 
     const matchSearch = namaPelatihan.includes(debouncedSearch.toLowerCase());
 
@@ -158,12 +158,12 @@ export default function JadwalUserPage() {
 
         {/* FILTER METODE */}
         <div className="flex gap-2">
-          {['semua', 'online', 'offline'].map((f) => (
+          {["semua", "online", "offline"].map((f) => (
             <button
               key={f}
               onClick={() => setFilterMetode(f)}
               className={`px-4 py-2 rounded-full text-sm capitalize transition
-          ${filterMetode === f ? 'bg-blue-500 text-white shadow' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'}`}
+          ${filterMetode === f ? "bg-blue-500 text-white shadow" : "bg-gray-100 hover:bg-gray-200 text-gray-600"}`}
             >
               {f}
             </button>
@@ -221,26 +221,22 @@ export default function JadwalUserPage() {
               </p>
 
               {/* Metode */}
-              <p className="dark:text-white">
-  {item.metode === 'online' ? '💻 Online' : '🏢 Offline'}
-</p>
+              <p className="text-gray-700 dark:text-gray-300">{item.metode === "online" ? "💻 Online" : "🏢 Offline"}</p>
 
               {/* Lokasi */}
-              <p className="text-sm mb-3 dark:text-slate-300">
-                📍 {item.metode === 'offline' ? item.location : 'Online'}
-              </p>
+              <p className="text-sm mb-3 text-gray-700 dark:text-gray-300">📍 {item.metode === "offline" ? item.location : "Online"}</p>
 
               {/* Status */}
               <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(item.status)}`}>{item.status}</span>
 
               {/* Button */}
               <button
-                disabled={item.status === 'done'}
+                disabled={item.status === "done"}
                 onClick={() => router.push(`/dashboard/user/pendaftaran?jadwalId=${item.id}`)}
                 className={`mt-5 w-full py-2.5 rounded-xl text-sm font-medium transition-all duration-300
-                    ${item.status === 'done' ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg'}`}
+                    ${item.status === "done" ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gradient-to-r from-blue-500 to-indigo-500 text-white hover:opacity-90 hover:shadow-lg"}`}
               >
-                {item.status === 'done' ? 'Selesai' : 'Daftar Sekarang'}
+                {item.status === "done" ? "Selesai" : "Daftar Sekarang"}
               </button>
             </div>
           ))}
