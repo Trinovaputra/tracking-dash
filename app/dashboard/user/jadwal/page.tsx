@@ -126,14 +126,15 @@ export default function JadwalUserPage() {
   });
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Jadwal Pelatihan</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-800 dark:text-white">Jadwal Pelatihan</h1>
       <div className="flex flex-wrap gap-3 mb-6 items-center">
         <input
           type="text"
           placeholder="🔍 Cari pelatihan..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full mb-4 border border-black rounded-xl px-4 py-2 text-sm 
+          className="w-full mb-4 border border-gray-300 dark:border-gray-600 
+ rounded-xl px-4 py-2 text-sm 
              focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
 
@@ -157,7 +158,7 @@ export default function JadwalUserPage() {
             className="
       w-full h-10 px-3 pr-10
       border border-gray-300 rounded-xl
-      text-sm bg-white
+      text-sm dark:text-gray-600 bg-white
       appearance-none
       focus:outline-none focus:ring-2 focus:ring-blue-500
     "
@@ -182,21 +183,21 @@ export default function JadwalUserPage() {
           {filteredData.map((item) => (
             <div
               key={item.id}
-              className="group border border-gray-200 rounded-2xl p-5 bg-white 
+              className="group border border-gray-200 dark:border-gray-700 rounded-2xl p-5 bg-white dark:bg-gray-800
              shadow-sm hover:shadow-xl hover:-translate-y-1 
              transition-all duration-300"
             >
               {/* Nama Pelatihan */}
-              <h2 className="text-lg font-semibold mb-3 text-gray-800 group-hover:text-blue-600 transition">{getPelatihanName(item.pelatihanId)}</h2>
+              <h2 className="text-lg font-semibold mb-3 text-gray-800 dark:text-white group-hover:text-blue-600 transition">{getPelatihanName(item.pelatihanId)}</h2>
 
               {/* Tanggal */}
-              <p className="text-sm text-gray-500 mb-2">📅 {formatDate(item.date)}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">📅 {formatDate(item.date)}</p>
 
               {/* Metode */}
-              <p>{item.metode === "online" ? "💻 Online" : "🏢 Offline"}</p>
+              <p className="text-gray-700 dark:text-gray-300">{item.metode === "online" ? "💻 Online" : "🏢 Offline"}</p>
 
               {/* Lokasi */}
-              <p className="text-sm mb-3">📍 {item.metode === "offline" ? item.location : "Online"}</p>
+              <p className="text-sm mb-3 text-gray-700 dark:text-gray-300">📍 {item.metode === "offline" ? item.location : "Online"}</p>
 
               {/* Status */}
               <span className={`text-xs px-3 py-1 rounded-full ${getStatusColor(item.status)}`}>{item.status}</span>
