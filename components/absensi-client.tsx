@@ -90,7 +90,7 @@ interface Jadwal {
 
 function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-6">
+    <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border dark:border-slate-700 p-6">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm text-gray-500 mb-1">{title}</p>
@@ -350,8 +350,8 @@ export function AbsensiClient() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Manajemen Absensi</h1>
-        <p className="text-gray-500">
+        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Manajemen Absensi</h1>
+        <p className="text-gray-500 dark:text-gray-400">
           Lihat, filter, dan export data kehadiran peserta pelatihan
         </p>
       </div>
@@ -391,19 +391,19 @@ export function AbsensiClient() {
       </div>
 
       {/* Filter Section */}
-      <div className="bg-white rounded-lg shadow-sm border p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border dark:border-slate-700 p-6">
         <div className="flex items-center gap-2 mb-4">
-          <Filter className="h-5 w-5" />
-          <h3 className="text-lg font-semibold">Filter & Pencarian</h3>
+          <Filter className="h-5 w-5 dark:text-white" />
+          <h3 className="text-lg font-semibold dark:text-white">Filter & Pencarian</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Search by Nama */}
           <div>
-            <Label htmlFor="search-nama">Cari Nama Peserta</Label>
+            <Label htmlFor="search-nama" className="dark:text-white">Cari Nama Peserta</Label>
             <div className="flex gap-2 mt-2">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400 dark:text-slate-400" />
                 <Input
                   id="search-nama"
                   placeholder="Ketik nama..."
@@ -417,7 +417,7 @@ export function AbsensiClient() {
 
           {/* Filter by Pelatihan */}
           <div>
-            <Label htmlFor="pelatihan">Pelatihan</Label>
+            <Label htmlFor="pelatihan" className="dark:text-white">Pelatihan</Label>
             <Select value={selectedPelatihan} onValueChange={setSelectedPelatihan}>
               <SelectTrigger id="pelatihan" className="mt-2">
                 <SelectValue placeholder="Pilih pelatihan" />
@@ -435,7 +435,7 @@ export function AbsensiClient() {
 
           {/* Filter by Jadwal */}
           <div>
-            <Label htmlFor="jadwal">Jadwal</Label>
+            <Label htmlFor="jadwal" className="dark:text-white">Jadwal</Label>
             <Select value={selectedJadwal} onValueChange={setSelectedJadwal}>
               <SelectTrigger id="jadwal" className="mt-2">
                 <SelectValue placeholder="Pilih jadwal" />
@@ -454,7 +454,7 @@ export function AbsensiClient() {
 
           {/* Start Date */}
           <div>
-            <Label htmlFor="start-date">Dari Tanggal</Label>
+            <Label htmlFor="start-date" className="dark:text-white">Dari Tanggal</Label>
             <Input
               id="start-date"
               type="date"
@@ -466,7 +466,7 @@ export function AbsensiClient() {
 
           {/* End Date */}
           <div>
-            <Label htmlFor="end-date">Sampai Tanggal</Label>
+            <Label htmlFor="end-date" className="dark:text-white">Sampai Tanggal</Label>
             <Input
               id="end-date"
               type="date"
@@ -516,14 +516,14 @@ export function AbsensiClient() {
       </div>
 
       {/* Table Section */}
-      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-lg shadow-sm border dark:border-slate-700 overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow key={headerGroup.id}>
+                <TableRow key={headerGroup.id} className="dark:border-slate-700">
                   {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="dark:text-white">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -537,10 +537,10 @@ export function AbsensiClient() {
             </TableHeader>
             <TableBody>
               {loading ? (
-                <TableRow>
+                <TableRow className="dark:border-slate-700">
                   <TableCell
                     colSpan={columns.length}
-                    className="text-center py-8 text-gray-500"
+                    className="text-center py-8 text-gray-500 dark:text-slate-400"
                   >
                     Loading...
                   </TableCell>
@@ -559,10 +559,10 @@ export function AbsensiClient() {
                   </TableRow>
                 ))
               ) : (
-                <TableRow>
+                <TableRow className="dark:border-slate-700">
                   <TableCell
                     colSpan={columns.length}
-                    className="text-center py-8 text-gray-500"
+                    className="text-center py-8 text-gray-500 dark:text-slate-400"
                   >
                     Tidak ada data absensi
                   </TableCell>
@@ -573,8 +573,8 @@ export function AbsensiClient() {
         </div>
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-6 py-4 border-t">
-          <div className="text-sm text-gray-500">
+        <div className="flex items-center justify-between px-6 py-4 border-t dark:border-slate-700">
+          <div className="text-sm text-gray-500 dark:text-slate-400">
             Halaman {table.getState().pagination.pageIndex + 1} dari{" "}
             {table.getPageCount() || 1}
           </div>
