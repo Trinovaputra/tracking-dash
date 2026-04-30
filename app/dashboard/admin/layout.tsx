@@ -19,7 +19,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       {/* Main Content (Right) */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Header (Top) */}
-        <AdminHeader session={session} />
+        <AdminHeader />
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-8 overflow-auto">{children}</main>
